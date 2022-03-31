@@ -1,7 +1,11 @@
+using BimsyncCLI.Services;
+using BimsyncCLI.Services.DelegatingHandlers;
+using BimsyncCLI.Services.HttpServices;
 using McMaster.Extensions.CommandLineUtils;
 using Microsoft.Extensions.Logging;
 using System;
 using System.IO;
+using System.Net;
 using System.Net.Http;
 using System.Runtime.InteropServices;
 using System.Security;
@@ -18,8 +22,7 @@ namespace BimsyncCLI
     abstract class bimsyncCmdBase
     {
         private UserProfile _userProfile;
-        private iStradaClient _iStradaClient;
-
+        protected IBimsyncClient _bimsyncClient;
         protected ILogger _logger;
         protected IHttpClientFactory _httpClientFactory;
         protected IConsole _console;
@@ -72,18 +75,29 @@ namespace BimsyncCLI
             }
         }
 
-        protected iStradaClient iStradaClient
-        {
-            get
-            {
-                if (_iStradaClient == null)
-                {
-                    _iStradaClient = new iStradaClient(_httpClientFactory.CreateClient(), UserProfile, _logger);
-                }
+        // protected BimsyncClient bimsyncClient
+        // {
+        //     get
+        //     {
+        //         if (_bimsyncClient == null)
+        //         {
+        //             // _bimsyncClient = new iStradaClient(_httpClientFactory.CreateClient(), UserProfile, _logger);
+        //             ICredentials credentials = CredentialCache.DefaultCredentials;
+        //             IWebProxy proxy = WebRequest.DefaultWebProxy;
+        //             proxy.Credentials = credentials;
+                    
+        //             SettingsService settingsService = new SettingsService("settings.bimsync");
+                    
+        //             AuthenticationService authenticationService = new AuthenticationService(proxy, settingsService);
 
-                return _iStradaClient;
-            }
-        }
+        //             HttpClient httpClient = _httpClientFactory.CreateClient();
+
+        //             _bimsyncClient = new BimsyncClient(httpClient);
+        //         }
+
+        //         return _bimsyncClient;
+        //     }
+        // }
 
         protected String SecureStringToString(SecureString value)
         {

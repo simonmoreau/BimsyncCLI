@@ -9,6 +9,7 @@ using System.Text.Json;
 using System.Xml;
 using System.Collections.Generic;
 using BimsyncCLI.Models.Bimsync;
+using BimsyncCLI.Services.HttpServices;
 
 namespace BimsyncCLI
 {
@@ -25,11 +26,12 @@ namespace BimsyncCLI
         [Option(CommandOptionType.NoValue, LongName = "staging", Description = "istrada staging api", ValueName = "staging", ShowInHelpText = true)]
         public bool Staging { get; set; } = false;
         
-        public LoginCmd(ILogger<LoginCmd> logger, IConsole console, IHttpClientFactory clientFactory)
+        public LoginCmd(ILogger<LoginCmd> logger, IConsole console, IHttpClientFactory clientFactory, IBimsyncClient bimsyncClient)
         {            
             _logger = logger;
             _console = console;
             _httpClientFactory = clientFactory;
+            _bimsyncClient = bimsyncClient;
         }
         private bimsyncCmd Parent { get; set; }
 
@@ -46,7 +48,7 @@ namespace BimsyncCLI
 
             try
             {      
-                List<Project> projects = await iStradaClient.GetProjects(new System.Threading.CancellationToken());
+                List<Project> projects = await _bimsyncClient.GetProjects(new System.Threading.CancellationToken());
                           
                 var userProfile = new UserProfile()
                 {

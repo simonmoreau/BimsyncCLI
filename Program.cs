@@ -60,7 +60,7 @@ namespace BimsyncCLI
 
             try
             {
-                return await builder.RunCommandLineApplicationAsync<bimsyncCmd>(args);
+                return await builder.RunCommandLineApplicationAsync<LoginCmd>(args);
             }
             catch(Exception ex)
             {

@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace BimsyncCLI
 {
-    [Command(Name = "istrada", OptionsComparison = System.StringComparison.InvariantCultureIgnoreCase )]
+    [Command(Name = "bimsync", OptionsComparison = System.StringComparison.InvariantCultureIgnoreCase )]
     [VersionOptionFromMember("--version", MemberName = nameof(GetVersion))]
     [Subcommand(
         typeof(LoginCmd))]
@@ -15,12 +15,12 @@ namespace BimsyncCLI
         {
             _logger = logger;
             _console = console;
-        }       
+        }
 
         protected override Task<int> OnExecute(CommandLineApplication app)
         {
             // this shows help even if the --help option isn't specified
-            app.ShowHelp();            
+            app.ShowHelp();
             return Task.FromResult(0);
         }
 
