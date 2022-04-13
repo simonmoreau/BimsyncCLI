@@ -13,22 +13,12 @@ using BimsyncCLI.Services.HttpServices;
 using BimsyncCLI.Services;
 using Spectre.Console;
 
-namespace BimsyncCLI
+namespace BimsyncCLI.ProjectCmd
 {
-    [Command(Name = "projects", Description = "List all available Bimsync projects")]
-    class ProjectsCmd : bimsyncCmdBase
+    [Command(Name = "list", Description = "List available Bimsync projects.")]
+    class ProjectListCmd : bimsyncCmdBase
     {
-
-        [Option(CommandOptionType.SingleValue, ShortName = "u", LongName = "username", Description = "istrada login username", ValueName = "login username", ShowInHelpText = true)]
-        public string Username { get; set; }
-
-        [Option(CommandOptionType.SingleValue, ShortName = "p", LongName = "password", Description = "istrada login password", ValueName = "login password", ShowInHelpText = true)]
-        public string Password { get; set; }
-
-        [Option(CommandOptionType.NoValue, LongName = "staging", Description = "istrada staging api", ValueName = "staging", ShowInHelpText = true)]
-        public bool Staging { get; set; } = false;
-
-        public ProjectsCmd(ILogger<ProjectsCmd> logger, IConsole console, IHttpClientFactory clientFactory, IBimsyncClient bimsyncClient, SettingsService settingsService)
+        public ProjectListCmd(ILogger<ProjectCmd> logger, IConsole console, IHttpClientFactory clientFactory, IBimsyncClient bimsyncClient, SettingsService settingsService)
         {
             _logger = logger;
             _console = console;
@@ -36,7 +26,7 @@ namespace BimsyncCLI
             _bimsyncClient = bimsyncClient;
             _settingsService = settingsService;
         }
-        private bimsyncCmd Parent { get; set; }
+        private ProjectCmd Parent { get; set; }
 
         protected override async Task<int> OnExecute(CommandLineApplication app)
         {
@@ -56,28 +46,28 @@ namespace BimsyncCLI
                     .StartAsync("Fetching all projects...", async ctx =>
                     {
                         List<Project> projects = await _bimsyncClient.GetProjects(_settingsService.CancellationToken);
-                        
+
                         // Create a table
                         Table table = new Table();
-                        
-                        
+
+
                         // Add some columns
                         table.AddColumn("Name");
                         table.AddColumn(new TableColumn("Last Updated").Centered());
-                        
+
                         // Add some rows
                         foreach (Project project in projects)
                         {
                             table.AddRow(project.name, project.updatedAt.ToString("MMMM dd, yyyy"));
                         }
-                        
+
                         // Render the table to the console
                         AnsiConsole.Write(table);
 
                         return 0;
                     });
 
-                    return 0;
+                return 0;
 
             }
             catch (Exception ex)

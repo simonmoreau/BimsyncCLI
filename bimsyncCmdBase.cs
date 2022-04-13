@@ -178,17 +178,30 @@ namespace BimsyncCLI
             _logger.LogDebug(ex, ex.Message);
         }
 
-        protected void OutputJson(string data, string rootElementName, string arrayElementName)
+        // protected void OutputJson(string data, string rootElementName, string arrayElementName)
+        // {
+        //     switch (OutputFormat.ToLowerInvariant())
+        //     {
+        //         case "json":
+        //             Output(data);
+        //             break;
+        //         case "xml":
+        //             var xml = JsonSerializer.DeserializeXNode(data.StartsWith("[") ? $"{{{arrayElementName}:{data}}}" : data, rootElementName);
+        //             OutputXml(xml);
+        //             break;
+        //         default:
+        //             OutputError("format not supported");
+        //             break;
+        //     }
+        // }
+
+        protected void OutputJson(string data)
         {
             switch (OutputFormat.ToLowerInvariant())
             {
                 case "json":
                     Output(data);
                     break;
-                // case "xml":
-                //     var xml = JsonSerializer.DeserializeXNode(data.StartsWith("[") ? $"{{{arrayElementName}:{data}}}" : data, rootElementName);
-                //     OutputXml(xml);
-                //     break;
                 default:
                     OutputError("format not supported");
                     break;
