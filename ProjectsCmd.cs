@@ -10,10 +10,11 @@ using System.Xml;
 using System.Collections.Generic;
 using BimsyncCLI.Models.Bimsync;
 using BimsyncCLI.Services.HttpServices;
+using BimsyncCLI.Services;
 
 namespace BimsyncCLI
 {
-    [Command(Name = "projects", Description = "login to istrada, the login crendentials will be saved locally in the profile")]
+    [Command(Name = "projects", Description = "List all available Bimsync projects")]
     class ProjectsCmd : bimsyncCmdBase
     {
 
@@ -26,31 +27,30 @@ namespace BimsyncCLI
         [Option(CommandOptionType.NoValue, LongName = "staging", Description = "istrada staging api", ValueName = "staging", ShowInHelpText = true)]
         public bool Staging { get; set; } = false;
         
-        public ProjectsCmd(ILogger<ProjectsCmd> logger, IConsole console, IHttpClientFactory clientFactory, IBimsyncClient bimsyncClient)
+        public ProjectsCmd(ILogger<ProjectsCmd> logger, IConsole console, IHttpClientFactory clientFactory, IBimsyncClient bimsyncClient, SettingsService settingsService)
         {            
             _logger = logger;
             _console = console;
             _httpClientFactory = clientFactory;
             _bimsyncClient = bimsyncClient;
+            _settingsService = settingsService;
         }
         private bimsyncCmd Parent { get; set; }
 
         protected override async Task<int> OnExecute(CommandLineApplication app)
         {
-            if (string.IsNullOrEmpty(Username) || string.IsNullOrEmpty(Password))
-            {
-                Username = Prompt.GetString("iStrada Username:", Username);
-                Password = SecureStringToString(Prompt.GetPasswordAsSecureString("iStrada Password:"));
-                Staging = Prompt.GetYesNo("iStrada Staging?   ", Staging);
-                Profile = Prompt.GetString("User profile name:", Profile);
-                OutputFormat = Prompt.GetString("Output format (json|xml|text|table):", OutputFormat);
-            }
+            // if (string.IsNullOrEmpty(Username) || string.IsNullOrEmpty(Password))
+            // {
+            //     Username = Prompt.GetString("iStrada Username:", Username);
+            //     Password = SecureStringToString(Prompt.GetPasswordAsSecureString("iStrada Password:"));
+            //     Staging = Prompt.GetYesNo("iStrada Staging?   ", Staging);
+            //     Profile = Prompt.GetString("User profile name:", Profile);
+            //     OutputFormat = Prompt.GetString("Output format (json|xml|text|table):", OutputFormat);
+            // }
 
             try
             {      
-                List<Project> projects = await _bimsyncClient.GetProjects(new System.Threading.CancellationToken());
-
-                
+                List<Project> projects = await _bimsyncClient.GetProjects(_settingsService.CancellationToken);
 
                 return 0;
 

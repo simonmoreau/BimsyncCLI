@@ -29,12 +29,12 @@ namespace BimsyncCLI
                    .ReadFrom.Configuration(Configuration)
                    .Enrich.FromLogContext()
                    .CreateLogger();
-                   
-                        ICredentials credentials = CredentialCache.DefaultCredentials;
+
+            ICredentials credentials = CredentialCache.DefaultCredentials;
             IWebProxy proxy = WebRequest.DefaultWebProxy;
             proxy.Credentials = credentials;
 
-            SettingsService settingsService = new SettingsService("settings.bimsync");
+            SettingsService settingsService = new SettingsService("settingsCLI.bimsync");
 
             AuthenticationService authenticationService = new AuthenticationService(proxy, settingsService);
 
@@ -47,7 +47,7 @@ namespace BimsyncCLI
                         config.AddProvider(new SerilogLoggerProvider(Log.Logger));
                     });
                     services.AddHttpClient();
-                    
+
                     services.AddHttpClient<IBimsyncClient, BimsyncClient>()
                 .AddHttpMessageHandler(handler => new AuthenticationDelegatingHandler(authenticationService))
                 .ConfigurePrimaryHttpMessageHandler(handler =>
@@ -56,13 +56,23 @@ namespace BimsyncCLI
                        Proxy = proxy,
                        AutomaticDecompression = System.Net.DecompressionMethods.GZip
                    });
+
+                    services.AddSingleton<AuthenticationService>(y =>
+ {
+     return authenticationService;
+ });
+
+                    services.AddSingleton<SettingsService>(y =>
+                    {
+                        return settingsService;
+                    });
                 });
 
             try
             {
-                return await builder.RunCommandLineApplicationAsync<LoginCmd>(args);
+                return await builder.RunCommandLineApplicationAsync<bimsyncCmd>(args);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
                 return 1;

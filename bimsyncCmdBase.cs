@@ -24,6 +24,7 @@ namespace BimsyncCLI
         private UserProfile _userProfile;
         protected IBimsyncClient _bimsyncClient;
         protected AuthenticationService _authenticationService;
+        protected SettingsService _settingsService;
         protected ILogger _logger;
         protected IHttpClientFactory _httpClientFactory;
         protected IConsole _console;

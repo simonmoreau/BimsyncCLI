@@ -22,13 +22,15 @@ namespace BimsyncCLI
     [Command(Name = "login", Description = "login to Bimsync, the login crendentials will be saved locally in the profile")]
     class LoginCmd : bimsyncCmdBase
     {
-        public LoginCmd(ILogger<ProjectsCmd> logger, IConsole console, IHttpClientFactory clientFactory, IBimsyncClient bimsyncClient, AuthenticationService authenticationService)
+        public LoginCmd(ILogger<ProjectsCmd> logger, IConsole console, IHttpClientFactory clientFactory,
+         IBimsyncClient bimsyncClient, AuthenticationService authenticationService, SettingsService settingsService)
         {
             _logger = logger;
             _console = console;
             _httpClientFactory = clientFactory;
             _bimsyncClient = bimsyncClient;
             _authenticationService = authenticationService;
+            _settingsService = settingsService;
         }
         private bimsyncCmd Parent { get; set; }
 
@@ -39,7 +41,7 @@ namespace BimsyncCLI
             {
 
                 _console.WriteLine("+-----------------------+");
-                _console.WriteLine("|  Sign in Bimsync    |");
+                _console.WriteLine("|   Sign in Bimsync     |");
                 _console.WriteLine("+-----------------------+");
                 _console.WriteLine("");
 
@@ -85,12 +87,27 @@ namespace BimsyncCLI
 
             if (string.IsNullOrEmpty(code)) throw new ArgumentNullException("The login code is not correct");
 
+            _authenticationService.SetAuthorizationCode(code);
             Token token = await _authenticationService.Login();
+
 
             if (token == null)
             {
-                throw new Exception("the code did not work");
+                throw new Exception("The application could not login. Please try again later.");
             }
+            else
+            {
+                User me = await _bimsyncClient.GetCurrentUser(_settingsService.CancellationToken);
+
+                _console.ForegroundColor = ConsoleColor.Green;
+                _console.WriteLine("+------------------------------+");
+                _console.WriteLine($"| Hello {me.name} |");
+                _console.WriteLine("|  Welcome to the Bimsync CLI  |");
+                _console.WriteLine("+------------------------------+");
+                _console.WriteLine("");
+                _console.ResetColor();
+            }
+
 
         }
 

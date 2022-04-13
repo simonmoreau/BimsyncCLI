@@ -7,6 +7,8 @@ using System.Threading.Tasks;
 using BimsyncCLI.Models.Bimsync;
 using System.Text.Json;
 using System.Diagnostics;
+using System.Threading;
+using System.Text.Json.Serialization;
 
 namespace BimsyncCLI.Services
 {
@@ -14,6 +16,7 @@ namespace BimsyncCLI.Services
     {
         private string settingsFileName = "settingsCLI.bimsync";
         private string settingsFilePath = "";
+        private CancellationTokenSource _cancellationTokenSource = new CancellationTokenSource();
 
         public SettingsService()
         {
@@ -26,13 +29,20 @@ namespace BimsyncCLI.Services
             settingsFileName = fileName;
             settingsFilePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), settingsFileName);
             GetSavedSettings(settingsFilePath);
+            _cancellationTokenSource = new CancellationTokenSource();
         }
 
-        public bool StayOrthographic { get; set;}
-        public bool AlwaysNewView { get; set;}
-        public string ViewNameSuffix { get; set;}
-        public Token Token { get; set;}
+        public bool StayOrthographic { get; set; }
+        public bool AlwaysNewView { get; set; }
+        public string ViewNameSuffix { get; set; }
+        public Token Token { get; set; }
         public Dictionary<string, Transform> Transforms { get; set; }
+
+        [JsonIgnore]
+        public CancellationToken CancellationToken
+        {
+            get { return _cancellationTokenSource.Token; }
+        }
 
         private void GetSavedSettings(string path)
         {
@@ -41,9 +51,9 @@ namespace BimsyncCLI.Services
                 if (File.Exists(path))
                 {
                     // deserialize JSON directly from a file
-                        string file = File.ReadAllText(settingsFilePath);
-                        SettingsService deserializedSettings = JsonSerializer.Deserialize<SettingsService>(file);
-                        SetValuesFromSettingsObject(deserializedSettings);
+                    string file = File.ReadAllText(settingsFilePath);
+                    SettingsService deserializedSettings = JsonSerializer.Deserialize<SettingsService>(file);
+                    SetValuesFromSettingsObject(deserializedSettings);
                 }
                 else
                 {
@@ -79,7 +89,7 @@ namespace BimsyncCLI.Services
         {
 
             string settingText = JsonSerializer.Serialize<SettingsService>(this);
-            File.WriteAllText(settingsFilePath,settingText);
+            File.WriteAllText(settingsFilePath, settingText);
         }
 
         public void SaveSettings(bool stayOrthographic, bool alwaysNewView, string viewNameSuffix)
@@ -95,7 +105,7 @@ namespace BimsyncCLI.Services
             StayOrthographic = stayOrthographic;
             AlwaysNewView = alwaysNewView;
             ViewNameSuffix = viewNameSuffix;
-            
+
             WriteSettingsToFile();
         }
 
@@ -108,8 +118,9 @@ namespace BimsyncCLI.Services
                 // This is ugly, but I admit that if I can't write the token to the text file, I just keep it in memory
                 WriteSettingsToFile();
             }
-            catch
+            catch (Exception ex)
             {
+                Debug.WriteLine(ex.Message);
                 // Do nothing
             }
         }

@@ -88,6 +88,12 @@ namespace BimsyncCLI.Services
             }
         }
 
+        public bool SetAuthorizationCode(string code)
+        {
+            _authorizationCode = code;
+            return true;
+        }
+
         public async Task<Token> Login()
         {
             
@@ -126,7 +132,7 @@ namespace BimsyncCLI.Services
             {
                 if (_authorizationCode == null) // We must first have an authorization code
                 {
-                    return null;
+                    throw new Exception("You are not logged to Bimsync. Please login first by running the command \"bimsync login\"");
                 }
                 else // We have an authorization code, we use it
                 {

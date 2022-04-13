@@ -8,7 +8,8 @@ namespace BimsyncCLI
     [Command(Name = "bimsync", OptionsComparison = System.StringComparison.InvariantCultureIgnoreCase )]
     [VersionOptionFromMember("--version", MemberName = nameof(GetVersion))]
     [Subcommand(
-        typeof(ProjectsCmd))]
+        typeof(ProjectsCmd),
+        typeof(LoginCmd))]
     class bimsyncCmd : bimsyncCmdBase
     {
         public bimsyncCmd(ILogger<bimsyncCmd> logger, IConsole console)
