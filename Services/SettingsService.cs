@@ -128,6 +128,7 @@ namespace BimsyncCLI.Services
         public void ClearToken()
         {
             Token = null;
+            WriteSettingsToFile();
         }
     }
 }

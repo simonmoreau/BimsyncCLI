@@ -9,7 +9,8 @@ namespace BimsyncCLI
     [VersionOptionFromMember("--version", MemberName = nameof(GetVersion))]
     [Subcommand(
         typeof(ProjectCmd.ProjectCmd),
-        typeof(SignInCmd))]
+        typeof(SignInCmd),
+        typeof(SignOutCmd))]
     class bimsyncCmd : bimsyncCmdBase
     {
         public bimsyncCmd(ILogger<bimsyncCmd> logger, IConsole console)

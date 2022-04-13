@@ -132,7 +132,7 @@ namespace BimsyncCLI.Services
             {
                 if (_authorizationCode == null) // We must first have an authorization code
                 {
-                    throw new Exception("You are not logged to Bimsync. Please login first by running the command \"bimsync login\"");
+                    throw new Exception("You are not logged to Bimsync. Please sign in first by running the command \"bimsync sign-in\"");
                 }
                 else // We have an authorization code, we use it
                 {
