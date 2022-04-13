@@ -195,12 +195,19 @@ namespace BimsyncCLI
         //     }
         // }
 
-        protected void OutputJson(string data)
+        protected void OutputJson(object data)
         {
             switch (OutputFormat.ToLowerInvariant())
             {
                 case "json":
-                    Output(data);
+
+                    JsonSerializerOptions options = new JsonSerializerOptions()
+                    {
+                        WriteIndented = true
+                    };
+
+                    string jsonOutput = JsonSerializer.Serialize(data, options);
+                    Output(jsonOutput);
                     break;
                 default:
                     OutputError("format not supported");
@@ -255,7 +262,7 @@ namespace BimsyncCLI
             // _console.ForegroundColor = ConsoleColor.White;
             // _console.Out.Write(data);
             // _console.ResetColor();
-            AnsiConsole.Markup($"[black on white]{data}[/]");
+            AnsiConsole.Markup($"{data}");
         }
 
         protected void OutputError(string message)

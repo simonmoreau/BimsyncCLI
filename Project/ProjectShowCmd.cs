@@ -88,7 +88,8 @@ namespace BimsyncCLI.ProjectCmd
                 }
                 else
                 {
-                    OutputJson(JsonSerializer.Serialize(project));
+
+                    OutputJson(project);
                 }
 
                 return 0;
