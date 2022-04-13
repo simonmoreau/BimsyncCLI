@@ -12,7 +12,7 @@ namespace BimsyncCLI.Services
 {
     public class SettingsService
     {
-        private string settingsFileName = "settings.bimsync";
+        private string settingsFileName = "settingsCLI.bimsync";
         private string settingsFilePath = "";
 
         public SettingsService()

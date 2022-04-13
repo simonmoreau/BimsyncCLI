@@ -48,9 +48,9 @@ namespace BimsyncCLI.Services
             
             ServicePointManager.SecurityProtocol |= SecurityProtocolType.Tls12;
 
-            client_id = "vDvnqZfMq5Un8f9";
-            client_secret = "9LdLuus2MGMfk1L";
-            redirect_uri = "BimsyncRevitPlugin://callback";
+            client_id = "bDaDxEqY4icOBdp";
+            client_secret = "pUM59IePpjCGY94";
+            redirect_uri = "https://catenda.com/products/bimsync-arena/";
             loginUrl = string.Format(
                 "https://api.bimsync.com/oauth2/authorize?client_id={0}&response_type=code&state=api&redirect_uri={1}&prompt=none",
                 client_id,
