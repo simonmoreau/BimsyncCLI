@@ -11,6 +11,7 @@ using System.Collections.Generic;
 using BimsyncCLI.Models.Bimsync;
 using BimsyncCLI.Services.HttpServices;
 using BimsyncCLI.Services;
+using Spectre.Console;
 
 namespace BimsyncCLI
 {
@@ -18,17 +19,17 @@ namespace BimsyncCLI
     class ProjectsCmd : bimsyncCmdBase
     {
 
-        [Option(CommandOptionType.SingleValue, ShortName = "u", LongName = "username", Description = "istrada login username", ValueName = "login username", ShowInHelpText = true)]       
+        [Option(CommandOptionType.SingleValue, ShortName = "u", LongName = "username", Description = "istrada login username", ValueName = "login username", ShowInHelpText = true)]
         public string Username { get; set; }
 
-        [Option(CommandOptionType.SingleValue, ShortName = "p", LongName = "password", Description = "istrada login password", ValueName = "login password", ShowInHelpText = true)]        
+        [Option(CommandOptionType.SingleValue, ShortName = "p", LongName = "password", Description = "istrada login password", ValueName = "login password", ShowInHelpText = true)]
         public string Password { get; set; }
 
         [Option(CommandOptionType.NoValue, LongName = "staging", Description = "istrada staging api", ValueName = "staging", ShowInHelpText = true)]
         public bool Staging { get; set; } = false;
-        
+
         public ProjectsCmd(ILogger<ProjectsCmd> logger, IConsole console, IHttpClientFactory clientFactory, IBimsyncClient bimsyncClient, SettingsService settingsService)
-        {            
+        {
             _logger = logger;
             _console = console;
             _httpClientFactory = clientFactory;
@@ -49,10 +50,34 @@ namespace BimsyncCLI
             // }
 
             try
-            {      
-                List<Project> projects = await _bimsyncClient.GetProjects(_settingsService.CancellationToken);
+            {
+                // Asynchronous
+                await AnsiConsole.Status()
+                    .StartAsync("Fetching all projects...", async ctx =>
+                    {
+                        List<Project> projects = await _bimsyncClient.GetProjects(_settingsService.CancellationToken);
+                        
+                        // Create a table
+                        Table table = new Table();
+                        
+                        
+                        // Add some columns
+                        table.AddColumn("Name");
+                        table.AddColumn(new TableColumn("Last Updated").Centered());
+                        
+                        // Add some rows
+                        foreach (Project project in projects)
+                        {
+                            table.AddRow(project.name, project.updatedAt.ToString("MMMM dd, yyyy"));
+                        }
+                        
+                        // Render the table to the console
+                        AnsiConsole.Write(table);
 
-                return 0;
+                        return 0;
+                    });
+
+                    return 0;
 
             }
             catch (Exception ex)

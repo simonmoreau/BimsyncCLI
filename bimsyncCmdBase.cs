@@ -3,6 +3,7 @@ using BimsyncCLI.Services.DelegatingHandlers;
 using BimsyncCLI.Services.HttpServices;
 using McMaster.Extensions.CommandLineUtils;
 using Microsoft.Extensions.Logging;
+using Spectre.Console;
 using System;
 using System.IO;
 using System.Net;
@@ -76,30 +77,6 @@ namespace BimsyncCLI
                 return _userProfile;
             }
         }
-
-        // protected BimsyncClient bimsyncClient
-        // {
-        //     get
-        //     {
-        //         if (_bimsyncClient == null)
-        //         {
-        //             // _bimsyncClient = new iStradaClient(_httpClientFactory.CreateClient(), UserProfile, _logger);
-        //             ICredentials credentials = CredentialCache.DefaultCredentials;
-        //             IWebProxy proxy = WebRequest.DefaultWebProxy;
-        //             proxy.Credentials = credentials;
-                    
-        //             SettingsService settingsService = new SettingsService("settings.bimsync");
-                    
-        //             AuthenticationService authenticationService = new AuthenticationService(proxy, settingsService);
-
-        //             HttpClient httpClient = _httpClientFactory.CreateClient();
-
-        //             _bimsyncClient = new BimsyncClient(httpClient);
-        //         }
-
-        //         return _bimsyncClient;
-        //     }
-        // }
 
         protected String SecureStringToString(SecureString value)
         {
@@ -201,22 +178,22 @@ namespace BimsyncCLI
             _logger.LogDebug(ex, ex.Message);
         }
 
-        // protected void OutputJson(string data, string rootElementName, string arrayElementName)
-        // {
-        //     switch (OutputFormat.ToLowerInvariant())
-        //     {
-        //         case "json":
-        //             Output(data);
-        //             break;
-        //         case "xml":
-        //             var xml = JsonSerializer.DeserializeXNode(data.StartsWith("[") ? $"{{{arrayElementName}:{data}}}" : data, rootElementName);
-        //             OutputXml(xml);
-        //             break;
-        //         default:
-        //             OutputError("format not supported");
-        //             break;
-        //     }
-        // }
+        protected void OutputJson(string data, string rootElementName, string arrayElementName)
+        {
+            switch (OutputFormat.ToLowerInvariant())
+            {
+                case "json":
+                    Output(data);
+                    break;
+                // case "xml":
+                //     var xml = JsonSerializer.DeserializeXNode(data.StartsWith("[") ? $"{{{arrayElementName}:{data}}}" : data, rootElementName);
+                //     OutputXml(xml);
+                //     break;
+                default:
+                    OutputError("format not supported");
+                    break;
+            }
+        }
 
         protected void OutputXml(XDocument data)
         {
@@ -261,18 +238,20 @@ namespace BimsyncCLI
 
         protected void OutputToConsole(string data)
         {
-            _console.BackgroundColor = ConsoleColor.Black;
-            _console.ForegroundColor = ConsoleColor.White;
-            _console.Out.Write(data);
-            _console.ResetColor();
+            // _console.BackgroundColor = ConsoleColor.Black;
+            // _console.ForegroundColor = ConsoleColor.White;
+            // _console.Out.Write(data);
+            // _console.ResetColor();
+            AnsiConsole.Markup($"[black on white]{data}[/]");
         }
 
         protected void OutputError(string message)
         {
-            _console.BackgroundColor = ConsoleColor.Red;
-            _console.ForegroundColor = ConsoleColor.White;
-            _console.Error.WriteLine(message);
-            _console.ResetColor();
+            // _console.BackgroundColor = ConsoleColor.Red;
+            // _console.ForegroundColor = ConsoleColor.White;
+            // _console.Error.WriteLine(message);
+            // _console.ResetColor();
+            AnsiConsole.Markup($"[bold white on red]{message}[/]");
         }
     }
 }

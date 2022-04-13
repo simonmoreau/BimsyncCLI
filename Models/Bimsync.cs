@@ -11,8 +11,8 @@ namespace BimsyncCLI.Models.Bimsync
         public string id { get; set; }
         public string name { get; set; }
         public string description { get; set; }
-        public string createdAt { get; set; }
-        public string updatedAt { get; set; }
+        public DateTime createdAt { get; set; }
+        public DateTime updatedAt { get; set; }
         public string imageUrl { get; set; }
         public User owner { get; set; }
         public SiteLocation siteLocation { get; set; }

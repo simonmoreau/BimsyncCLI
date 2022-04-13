@@ -7,6 +7,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Serilog;
 using Serilog.Extensions.Logging;
+using Spectre.Console;
 using System;
 using System.IO;
 using System.Net;
@@ -58,9 +59,9 @@ namespace BimsyncCLI
                    });
 
                     services.AddSingleton<AuthenticationService>(y =>
- {
-     return authenticationService;
- });
+                    {
+                        return authenticationService;
+                        });
 
                     services.AddSingleton<SettingsService>(y =>
                     {
@@ -74,7 +75,7 @@ namespace BimsyncCLI
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.Message);
+                AnsiConsole.Markup($"[bold red on white]{ex.Message}[/]");
                 return 1;
             }
         }

@@ -16,13 +16,14 @@ using BimsyncCLI.Services.HttpServices;
 using System.Net;
 using System.Runtime.InteropServices;
 using BimsyncCLI.Services;
+using Spectre.Console;
 
 namespace BimsyncCLI
 {
-    [Command(Name = "login", Description = "login to Bimsync, the login crendentials will be saved locally in the profile")]
-    class LoginCmd : bimsyncCmdBase
+    [Command(Name = "sign-in", Description = "Sign in to Bimsync, the login crendentials will be saved locally in the profile")]
+    class SignInCmd : bimsyncCmdBase
     {
-        public LoginCmd(ILogger<ProjectsCmd> logger, IConsole console, IHttpClientFactory clientFactory,
+        public SignInCmd(ILogger<ProjectsCmd> logger, IConsole console, IHttpClientFactory clientFactory,
          IBimsyncClient bimsyncClient, AuthenticationService authenticationService, SettingsService settingsService)
         {
             _logger = logger;
@@ -40,17 +41,11 @@ namespace BimsyncCLI
             try
             {
 
-                _console.WriteLine("+-----------------------+");
-                _console.WriteLine("|   Sign in Bimsync     |");
-                _console.WriteLine("+-----------------------+");
-                _console.WriteLine("");
-
-                bool proceed = Prompt.GetYesNo("Do you want to sign in?",
-                        defaultAnswer: true,
-                        promptColor: ConsoleColor.Black,
-                        promptBgColor: ConsoleColor.White);
-
-                if (!proceed) return 1;
+                if (!AnsiConsole.Confirm("Do you want to sign in?"))
+                {
+                    OutputToConsole("Ok... :(");
+                    return 1;
+                }
 
                 await SignIn();
 
@@ -68,7 +63,6 @@ namespace BimsyncCLI
         private async Task SignIn()
         {
             string loginUrl = _authenticationService.GetLoginUrl();
-            Console.WriteLine($"Start URL: {loginUrl}");
 
             // open system browser to start authentication
             var ps = new ProcessStartInfo(loginUrl)
@@ -82,8 +76,7 @@ namespace BimsyncCLI
             // Brings the Console to Focus.
             BringConsoleToFront();
 
-            string code = "";
-            code = Prompt.GetString("Please copy here the login code displayed on the web page:", code);
+            string code = AnsiConsole.Ask<string>("Please type here the sign in code displayed on the web page:");
 
             if (string.IsNullOrEmpty(code)) throw new ArgumentNullException("The login code is not correct");
 
@@ -99,13 +92,12 @@ namespace BimsyncCLI
             {
                 User me = await _bimsyncClient.GetCurrentUser(_settingsService.CancellationToken);
 
-                _console.ForegroundColor = ConsoleColor.Green;
-                _console.WriteLine("+------------------------------+");
-                _console.WriteLine($"| Hello {me.name} |");
-                _console.WriteLine("|  Welcome to the Bimsync CLI  |");
-                _console.WriteLine("+------------------------------+");
-                _console.WriteLine("");
-                _console.ResetColor();
+                AnsiConsole.Write(new FigletText("Bimsync CLI")
+        .LeftAligned()
+        .Color(Color.Red));
+
+                AnsiConsole.Write(new Markup($"[bold red]Hello {me.name}[/]"));
+
             }
 
 
