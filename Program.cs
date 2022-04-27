@@ -75,7 +75,7 @@ namespace BimsyncCLI
             }
             catch (Exception ex)
             {
-                AnsiConsole.Markup($"[bold red on white]{ex.Message}[/]");
+                AnsiConsole.WriteException(ex);
                 return 1;
             }
         }

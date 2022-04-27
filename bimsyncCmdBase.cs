@@ -5,6 +5,9 @@ using McMaster.Extensions.CommandLineUtils;
 using Microsoft.Extensions.Logging;
 using Spectre.Console;
 using System;
+using System.Linq;
+using System.Collections;
+using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using System.Net.Http;
@@ -15,14 +18,15 @@ using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
 using System.Xml.Linq;
+using System.Xml.Serialization;
 using System.Xml.Xsl;
+using Spectre.Console.Rendering;
 
 namespace BimsyncCLI
 {
     [HelpOption("--help")]
     abstract class bimsyncCmdBase
     {
-        private UserProfile _userProfile;
         protected IBimsyncClient _bimsyncClient;
         protected AuthenticationService _authenticationService;
         protected SettingsService _settingsService;
@@ -30,13 +34,10 @@ namespace BimsyncCLI
         protected IHttpClientFactory _httpClientFactory;
         protected IConsole _console;
 
-        [Option(CommandOptionType.SingleValue, ShortName = "", LongName = "profile", Description = "local profile name", ValueName = "profile name", ShowInHelpText = true)]
-        public string Profile { get; set; } = "default";
-
-        [Option(CommandOptionType.SingleValue, ShortName = "", LongName = "output-format", Description = "output format", ValueName = "output format", ShowInHelpText = true)]
+        [Option(CommandOptionType.SingleValue, ShortName = "f", LongName = "output-format", Description = "Select the output format", ValueName = "table|json|xml", ShowInHelpText = true)]
         public string OutputFormat { get; set; } = "json";
 
-        [Option(CommandOptionType.SingleValue, ShortName = "o", LongName = "output", Description = "output file", ValueName = "output file", ShowInHelpText = true)]
+        [Option(CommandOptionType.SingleValue, ShortName = "o", LongName = "output", Description = "Output the result to a file", ValueName = "output file", ShowInHelpText = true)]
         public string OutputFile { get; set; }
 
         [Option(CommandOptionType.SingleValue, ShortName = "", LongName = "xslt", Description = "xslt input file for transformation", ValueName = "xslt file", ShowInHelpText = true)]
@@ -57,26 +58,6 @@ namespace BimsyncCLI
             }
         }
 
-
-        protected UserProfile UserProfile
-        {
-            get
-            {
-                if (_userProfile == null)
-                {
-                    string text = File.ReadAllText($"{ProfileFolder}{Profile}");
-                    if (!string.IsNullOrEmpty(text))
-                    {
-                        _userProfile = JsonSerializer.Deserialize<UserProfile>(text);
-                        if (_userProfile != null)
-                        {
-                            _userProfile.Password = Decrypt(_userProfile.Password);
-                        }
-                    }
-                }
-                return _userProfile;
-            }
-        }
 
         protected String SecureStringToString(SecureString value)
         {
@@ -173,32 +154,18 @@ namespace BimsyncCLI
 
         protected void OnException(Exception ex)
         {
-            OutputError(ex.Message);
+            OutputException(ex);
             _logger.LogError(ex.Message);
             _logger.LogDebug(ex, ex.Message);
         }
 
-        // protected void OutputJson(string data, string rootElementName, string arrayElementName)
-        // {
-        //     switch (OutputFormat.ToLowerInvariant())
-        //     {
-        //         case "json":
-        //             Output(data);
-        //             break;
-        //         case "xml":
-        //             var xml = JsonSerializer.DeserializeXNode(data.StartsWith("[") ? $"{{{arrayElementName}:{data}}}" : data, rootElementName);
-        //             OutputXml(xml);
-        //             break;
-        //         default:
-        //             OutputError("format not supported");
-        //             break;
-        //     }
-        // }
-
-        protected void OutputJson(object data)
+        protected void OutputJson(object data, string[] columns = null)
         {
             switch (OutputFormat.ToLowerInvariant())
             {
+                case "table":
+                    OutputTable(data, columns);
+                    break;
                 case "json":
 
                     JsonSerializerOptions options = new JsonSerializerOptions()
@@ -209,10 +176,94 @@ namespace BimsyncCLI
                     string jsonOutput = JsonSerializer.Serialize(data, options);
                     Output(jsonOutput);
                     break;
+                case "xml":
+
+                    XDocument xdoc = new XDocument(new XDeclaration("1.0", "utf-8", "yes"));
+
+                    using (var writer = xdoc.CreateWriter())
+                    {
+                        XmlSerializer x = new XmlSerializer(data.GetType());
+
+                        x.Serialize(writer, data);
+                    }
+                    OutputXml(xdoc);
+                    break;
                 default:
                     OutputError("format not supported");
                     break;
             }
+        }
+
+        protected void OutputTable(object data, string[] columnNames)
+        {
+            IList collection = (IList)data;
+            List<object> objects = new List<object>();
+
+            if (collection != null)
+            {
+                foreach (var item in collection)
+                {
+                    objects.Add(item);
+                }
+            }
+            else
+            {
+                objects.Add(data);
+            }
+
+            // Create a table
+            Table table = new Table();
+
+            // Create the list of column name if no input
+            if (columnNames == null)
+            {
+                Type itemType = objects[0].GetType();
+                columnNames = itemType.GetProperties().Select(p => p.Name).ToArray();
+            }
+
+            // Add some columns
+            foreach (string columnName in columnNames)
+            {
+                table.AddColumn(columnName);
+            }
+
+            // Add some rows
+            foreach (object item in objects)
+            {
+                List<string> columnsValues = new List<string>();
+
+                foreach (string columnName in columnNames)
+                {
+                    Type itemType = item.GetType();
+
+                    // Match properties with column names
+                    List<string> propertiesNames = itemType.GetProperties().Select(p => p.Name).ToList();
+                    string propertyName = propertiesNames.Where(propertiesName => propertiesName.ToLower() == columnName.ToLower().Replace(" ", "")).FirstOrDefault();
+
+                    if (propertyName == null) continue;
+
+                    object value = itemType.GetProperty(propertyName).GetValue(item, null);
+
+                    if (value == null)
+                    {
+                        columnsValues.Add("");
+                    }
+                    else if (value.GetType() == typeof(DateTime))
+                    {
+                        DateTime date = (DateTime)value;
+                        columnsValues.Add(date.ToString("MMMM dd, yyyy"));
+                    }
+                    else
+                    {
+                        columnsValues.Add(value.ToString());
+                    }
+                }
+
+                table.AddRow(columnsValues.ToArray());
+            }
+
+            Output(table);
+
         }
 
         protected void OutputXml(XDocument data)
@@ -251,6 +302,31 @@ namespace BimsyncCLI
             }
         }
 
+        protected void Output(Table table)
+        {
+            if (!string.IsNullOrEmpty(OutputFile))
+            {
+                string outputString = "";
+                foreach (TableRow tableRow in table.Rows)
+                {
+                    foreach (Markup markup in tableRow)
+                    {
+                        List<string> segmentStrings = markup.GetSegments(AnsiConsole.Console).Select(s => s.Text).ToList();
+                        segmentStrings.RemoveAt(0);
+                        segmentStrings.RemoveAt(segmentStrings.Count - 1);
+                        string line = segmentStrings.Aggregate((concat, str) => $"{concat}&{str}");
+                        outputString = outputString + line.Replace("Fetching all projects...\n                          ", "");
+                    }
+                }
+                OutputToFile(outputString);
+            }
+            else
+            {
+                // Render the table to the console
+                AnsiConsole.Write(table);
+            }
+        }
+
         protected void OutputToFile(string data)
         {
             File.WriteAllText(string.IsNullOrEmpty(FileNameSuffix) ? OutputFile : OutputFile.Replace("*", FileNameSuffix), data);
@@ -262,16 +338,19 @@ namespace BimsyncCLI
             // _console.ForegroundColor = ConsoleColor.White;
             // _console.Out.Write(data);
             // _console.ResetColor();
-            AnsiConsole.Markup($"{data}");
+            AnsiConsole.MarkupInterpolated($"{data}");
         }
 
         protected void OutputError(string message)
         {
-            // _console.BackgroundColor = ConsoleColor.Red;
-            // _console.ForegroundColor = ConsoleColor.White;
-            // _console.Error.WriteLine(message);
-            // _console.ResetColor();
             AnsiConsole.Markup($"[bold white on red]{message}[/]");
+        }
+
+        protected void OutputException(Exception ex)
+        {
+            AnsiConsole.WriteException(ex,
+                ExceptionFormats.ShortenPaths | ExceptionFormats.ShortenTypes |
+                ExceptionFormats.ShortenMethods | ExceptionFormats.ShowLinks);
         }
     }
 }

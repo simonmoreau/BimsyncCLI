@@ -47,22 +47,7 @@ namespace BimsyncCLI.ProjectCmd
                     {
                         List<Project> projects = await _bimsyncClient.GetProjects(_settingsService.CancellationToken);
 
-                        // Create a table
-                        Table table = new Table();
-
-
-                        // Add some columns
-                        table.AddColumn("Name");
-                        table.AddColumn(new TableColumn("Last Updated").Centered());
-
-                        // Add some rows
-                        foreach (Project project in projects)
-                        {
-                            table.AddRow(project.name, project.updatedAt.ToString("MMMM dd, yyyy"));
-                        }
-
-                        // Render the table to the console
-                        AnsiConsole.Write(table);
+                        OutputJson(projects, new[] {"Name","Description","Created At","Updated At","Id"});
 
                         return 0;
                     });
