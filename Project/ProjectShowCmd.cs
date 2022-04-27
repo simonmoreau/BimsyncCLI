@@ -47,14 +47,7 @@ namespace BimsyncCLI.ProjectCmd
                 }
 
                 Project project = null;
-                List<Project> projects = new List<Project>();
-
-                // Asynchronous
-                await AnsiConsole.Status()
-                    .StartAsync("Fetching project details...", async ctx =>
-                    {
-                        projects = await _bimsyncClient.GetProjects(_settingsService.CancellationToken);
-                    });
+                List<Project> projects = await _bimsyncClient.GetProjects(_settingsService.CancellationToken);
 
                 if (!string.IsNullOrEmpty(Name))
                 {

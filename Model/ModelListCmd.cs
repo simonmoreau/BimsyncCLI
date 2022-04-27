@@ -42,14 +42,7 @@ namespace BimsyncCLI.ModelCmd
                     return 0;
                 }
 
-                List<Project> projects = new List<Project>();
-
-                // Asynchronous
-                await AnsiConsole.Status()
-                    .StartAsync("Fetching all models...", async ctx =>
-                    {
-                        projects = await _bimsyncClient.GetProjects(_settingsService.CancellationToken);
-                    });
+                List<Project> projects = await _bimsyncClient.GetProjects(_settingsService.CancellationToken);
 
                 // Try to find a project by name
                 Project selectedProject = projects.Where(p => p.name == ProjectId).FirstOrDefault();
@@ -66,13 +59,7 @@ namespace BimsyncCLI.ModelCmd
                     return 0;
                 }
 
-                List<Model> models = new List<Model>();
-
-                await AnsiConsole.Status()
-                    .StartAsync("Fetching all models...", async ctx =>
-                    {
-                        models = await _bimsyncClient.GetModels(selectedProject.id, _settingsService.CancellationToken);
-                    });
+                List<Model> models = await _bimsyncClient.GetModels(selectedProject.id, _settingsService.CancellationToken);
 
                 OutputJson(models, new[] { "Name", "Id" });
 

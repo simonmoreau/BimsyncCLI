@@ -41,16 +41,11 @@ namespace BimsyncCLI.ProjectCmd
 
             try
             {
-                // Asynchronous
-                return await AnsiConsole.Status()
-                    .StartAsync("Fetching all projects...", async ctx =>
-                    {
-                        List<Project> projects = await _bimsyncClient.GetProjects(_settingsService.CancellationToken);
+                List<Project> projects = await _bimsyncClient.GetProjects(_settingsService.CancellationToken);
 
-                        OutputJson(projects, new[] {"Name","Description","Created At","Updated At","Id"});
+                OutputJson(projects, new[] { "Name", "Description", "Created At", "Updated At", "Id" });
 
-                        return 0;
-                    });
+                return 0;
 
             }
             catch (Exception ex)
