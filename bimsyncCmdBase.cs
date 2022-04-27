@@ -196,7 +196,7 @@ namespace BimsyncCLI
 
         protected void OutputTable(object data, string[] columnNames)
         {
-            IList collection = (IList)data;
+            IList collection = data as IList;
             List<object> objects = new List<object>();
 
             if (collection != null)
@@ -329,15 +329,46 @@ namespace BimsyncCLI
 
         protected void OutputToFile(string data)
         {
-            File.WriteAllText(string.IsNullOrEmpty(FileNameSuffix) ? OutputFile : OutputFile.Replace("*", FileNameSuffix), data);
+            if (IsValidPath(OutputFile))
+            {
+                File.WriteAllText(string.IsNullOrEmpty(FileNameSuffix) ? OutputFile : OutputFile.Replace("*", FileNameSuffix), data);
+            }
+            else
+            {
+                throw new Exception("The output path is not valid");
+            }
         }
+
+        private bool IsValidPath(string path, bool allowRelativePaths = false)
+        {
+            bool isValid = true;
+
+            try
+            {
+                string fullPath = Path.GetFullPath(path);
+
+                if (allowRelativePaths)
+                {
+                    isValid = Path.IsPathRooted(path);
+                }
+                else
+                {
+                    string root = Path.GetPathRoot(path);
+                    isValid = string.IsNullOrEmpty(root.Trim(new char[] { '\\', '/' })) == false;
+                }
+            }
+            catch
+            {
+                // isValid = false;
+                throw new Exception("The output path is not valid");
+            }
+
+            return isValid;
+        }
+
 
         protected void OutputToConsole(string data)
         {
-            // _console.BackgroundColor = ConsoleColor.Black;
-            // _console.ForegroundColor = ConsoleColor.White;
-            // _console.Out.Write(data);
-            // _console.ResetColor();
             AnsiConsole.MarkupInterpolated($"{data}");
         }
 

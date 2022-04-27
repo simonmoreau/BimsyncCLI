@@ -78,7 +78,7 @@ namespace BimsyncCLI.ProjectCmd
 
                 if (!string.IsNullOrEmpty(Id))
                 {
-                    project = projects.Where(p => p.name == Name).FirstOrDefault();
+                    project = projects.Where(p => p.id == Id).FirstOrDefault();
                 }
 
                 if (project == null)
@@ -88,8 +88,7 @@ namespace BimsyncCLI.ProjectCmd
                 }
                 else
                 {
-
-                    OutputJson(project);
+                    OutputJson(projects, new[] {"Name","Description","Created At","Updated At","Id"});
                 }
 
                 return 0;
