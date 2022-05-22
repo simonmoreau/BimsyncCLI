@@ -18,7 +18,8 @@ namespace BimsyncCLI.ModelCmd
     [Command(Name = "model", Description = "Manage available Bimsync models")]
     [Subcommand(
         typeof(ModelListCmd),
-        typeof(ModelShowCmd))]
+        typeof(ModelShowCmd),
+        typeof(ModelCreateCmd))]
     class ModelCmd : bimsyncCmdBase
     {
         public ModelCmd(ILogger<ModelCmd> logger, IConsole console, IHttpClientFactory clientFactory, IBimsyncClient bimsyncClient, SettingsService settingsService)

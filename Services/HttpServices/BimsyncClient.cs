@@ -34,7 +34,7 @@ namespace BimsyncCLI.Services.HttpServices
 
             ReturnValue<List<Project>> returnValueProjects = await SendPaginatedRequest<List<Project>>(request, cancellationToken);
             if (returnValueProjects.Value != null) projects.AddRange(returnValueProjects.Value);
-            
+
             while (returnValueProjects.Next != null)
             {
                 request = new HttpRequestMessage(HttpMethod.Get, returnValueProjects.Next.Replace(_client.BaseAddress.AbsoluteUri, ""));
@@ -64,6 +64,23 @@ namespace BimsyncCLI.Services.HttpServices
             return models;
         }
 
+        public async Task<Model> CreateModel(string projectId, string name, CancellationToken cancellationToken)
+        {
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, $"v2/projects/{projectId}/models");
+            request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+
+            var bodyObject = new { name };
+
+            string serializedBodyToCreate = JsonSerializer.Serialize(bodyObject);
+
+            request.Content = new StringContent(serializedBodyToCreate);
+            request.Content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
+
+            Model model = await SendRequest<Model>(request, cancellationToken);
+            return model;
+
+        }
+
         public async Task<List<Member>> GetMembers(string projectId, CancellationToken cancellationToken)
         {
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, $"v2/projects/{projectId}/members");
@@ -75,7 +92,7 @@ namespace BimsyncCLI.Services.HttpServices
             {
                 request = new HttpRequestMessage(HttpMethod.Get, returnValueMembers.Next.Replace(_client.BaseAddress.AbsoluteUri, ""));
                 returnValueMembers = await SendPaginatedRequest<List<Member>>(request, cancellationToken);
-                if (returnValueMembers.Value != null)  members.AddRange(returnValueMembers.Value);
+                if (returnValueMembers.Value != null) members.AddRange(returnValueMembers.Value);
             }
 
             return members;
@@ -133,12 +150,12 @@ namespace BimsyncCLI.Services.HttpServices
 
                     Stream stream = await response.Content.ReadAsStreamAsync();
                     return new ReturnValue<T>(JsonSerializer.Deserialize<T>(stream), next);
-                    
+
                 }
             }
             catch (OperationCanceledException ocException)
             {
-               Debug.WriteLine(DateTime.Now.ToString() + " - " + $"An BimsyncClient operation was cancelled with message {ocException.Message}. " + request.RequestUri.ToString());
+                Debug.WriteLine(DateTime.Now.ToString() + " - " + $"An BimsyncClient operation was cancelled with message {ocException.Message}. " + request.RequestUri.ToString());
                 T value = default(T);
                 return new ReturnValue<T>(value, next);
             }
@@ -184,7 +201,7 @@ namespace BimsyncCLI.Services.HttpServices
             }
             catch (OperationCanceledException ocException)
             {
-               Debug.WriteLine(DateTime.Now.ToString() + " - " + $"An BimsyncClient operation was cancelled with message {ocException.Message}. " + request.RequestUri);
+                Debug.WriteLine(DateTime.Now.ToString() + " - " + $"An BimsyncClient operation was cancelled with message {ocException.Message}. " + request.RequestUri);
                 T value = default(T);
                 return value;
             }

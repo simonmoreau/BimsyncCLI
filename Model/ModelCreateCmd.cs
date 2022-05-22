@@ -16,8 +16,8 @@ using Spectre.Console;
 
 namespace BimsyncCLI.ModelCmd
 {
-    [Command(Name = "show", Description = "Get the details of a model.")]
-    class ModelShowCmd : bimsyncCmdBase
+    [Command(Name = "create", Description = "Create a new model.")]
+    class ModelCreateCmd : bimsyncCmdBase
     {
         [Option(CommandOptionType.SingleValue, ShortName = "p", LongName = "project", Description = "The name or the Id of the projet", ValueName = "project name", ShowInHelpText = true)]
         public string ProjectId { get; set; }
@@ -25,10 +25,7 @@ namespace BimsyncCLI.ModelCmd
         [Option(CommandOptionType.SingleValue, ShortName = "n", LongName = "name", Description = "The name of the model", ValueName = "model name", ShowInHelpText = true)]
         public string Name { get; set; }
 
-        [Option(CommandOptionType.SingleValue, ShortName = "i", LongName = "id", Description = "The id of the model.", ValueName = "model id", ShowInHelpText = true)]
-        public string Id { get; set; }
-
-        public ModelShowCmd(ILogger<ModelCmd> logger, IConsole console, IHttpClientFactory clientFactory, IBimsyncClient bimsyncClient, SettingsService settingsService)
+        public ModelCreateCmd(ILogger<ModelCmd> logger, IConsole console, IHttpClientFactory clientFactory, IBimsyncClient bimsyncClient, SettingsService settingsService)
         {
             _logger = logger;
             _console = console;
@@ -40,7 +37,6 @@ namespace BimsyncCLI.ModelCmd
 
         protected override async Task<int> OnExecute(CommandLineApplication app)
         {
-
             try
             {
                 if (string.IsNullOrEmpty(ProjectId))
@@ -49,9 +45,9 @@ namespace BimsyncCLI.ModelCmd
                     return 0;
                 }
 
-                if (string.IsNullOrEmpty(Name) && string.IsNullOrEmpty(Id))
+                if (string.IsNullOrEmpty(Name))
                 {
-                    OutputError("Please specify a model name or id.");
+                    OutputError("Please specify a model name.");
                     return 0;
                 }
 
@@ -72,43 +68,19 @@ namespace BimsyncCLI.ModelCmd
                     return 0;
                 }
 
-                List<Model> models = await _bimsyncClient.GetModels(selectedProject.id, _settingsService.CancellationToken);
-
-                Model model = null;
-
                 if (!string.IsNullOrEmpty(Name))
                 {
-                    List<Model> selectedModels = models.Where(p => p.name == Name).ToList();
+                    Model model = await _bimsyncClient.CreateModel(selectedProject.id, Name, _settingsService.CancellationToken);
 
-                    if (selectedModels.Count == 0)
+                    if (model == null)
                     {
-                        OutputError("No models have been found with this name.");
+                        OutputError("Something went wrong, the model has not been created.");
                         return 0;
-                    }
-                    else if (selectedModels.Count == 1)
-                    {
-                        model = selectedModels.Where(p => p.name == Name).FirstOrDefault();
                     }
                     else
                     {
-                        OutputError("There are multiple models with this name, please use the --id argument instead.");
-                        return 0;
+                        OutputJson(model, new[] { "Name", "Id" });
                     }
-                }
-
-                if (!string.IsNullOrEmpty(Id))
-                {
-                    model = models.Where(p => p.id == Id).FirstOrDefault();
-                }
-
-                if (model == null)
-                {
-                    OutputError("No project have been found with this id.");
-                    return 0;
-                }
-                else
-                {
-                    OutputJson(model, new[] { "Name", "Id" });
                 }
 
                 return 0;

@@ -11,7 +11,7 @@
             "preLaunchTask": "build",
             // If you have changed target frameworks, make sure to update the program path.
             "program": "${workspaceFolder}/bin/Debug/netcoreapp3.1/win7-x64/bimsyncCLI.dll",
-            "args": ["model","list","-o json", "-p 19e17873dae94890acaa25977b3da5b4"],
+            "args": ["model","create","-f json", "-p e43d8c79d1c6409eb3dd871170b4d6b0", "-n AAATest"],
             "cwd": "${workspaceFolder}",
             // For more information about the 'console' field, see https://aka.ms/VSCode-CS-LaunchJson-Console
             "console": "integratedTerminal",
