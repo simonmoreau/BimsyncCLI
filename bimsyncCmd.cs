@@ -10,6 +10,7 @@ namespace BimsyncCLI
     [Subcommand(
         typeof(ProjectCmd.ProjectCmd),
         typeof(ModelCmd.ModelCmd),
+        typeof(RevisionCmd.RevisionCmd),
         typeof(SignInCmd),
         typeof(SignOutCmd))]
     class bimsyncCmd : bimsyncCmdBase
