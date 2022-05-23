@@ -81,6 +81,26 @@ namespace BimsyncCLI.Services.HttpServices
 
         }
 
+        public async Task<List<Revision>> GetRevisions(string projectId, string modelId, CancellationToken cancellationToken)
+        {
+            List<Revision> revisions = new List<Revision>();
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, $"v2/projects/{projectId}/revisions");
+
+            if (modelId != null) request = new HttpRequestMessage(HttpMethod.Get, $"v2/projects/{projectId}/revisions?model={modelId}");
+
+            ReturnValue<List<Revision>> returnValueRevisions = await SendPaginatedRequest<List<Revision>>(request, cancellationToken);
+            if (returnValueRevisions.Value != null) revisions.AddRange(returnValueRevisions.Value);
+
+            while (returnValueRevisions.Next != null)
+            {
+                request = new HttpRequestMessage(HttpMethod.Get, returnValueRevisions.Next.Replace(_client.BaseAddress.AbsoluteUri, ""));
+                returnValueRevisions = await SendPaginatedRequest<List<Revision>>(request, cancellationToken);
+                if (returnValueRevisions.Value != null) revisions.AddRange(returnValueRevisions.Value);
+            }
+
+            return revisions;
+        }
+
         public async Task<List<Member>> GetMembers(string projectId, CancellationToken cancellationToken)
         {
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, $"v2/projects/{projectId}/members");
