@@ -23,12 +23,11 @@ namespace BimsyncCLI
     [Command(Name = "sign-out", Description = "Sign out of Bimsync.")]
     class SignOutCmd : bimsyncCmdBase
     {
-        public SignOutCmd(ILogger<SignInCmd> logger, IConsole console, IHttpClientFactory clientFactory,
+        public SignOutCmd(ILogger<SignInCmd> logger, IConsole console, 
          IBimsyncClient bimsyncClient, AuthenticationService authenticationService, SettingsService settingsService)
         {
             _logger = logger;
             _console = console;
-            _httpClientFactory = clientFactory;
             _bimsyncClient = bimsyncClient;
             _authenticationService = authenticationService;
             _settingsService = settingsService;

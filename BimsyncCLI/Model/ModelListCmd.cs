@@ -17,15 +17,14 @@ using Spectre.Console;
 namespace BimsyncCLI.ModelCmd
 {
     [Command(Name = "list", Description = "List available Bimsync models.")]
-    class ModelListCmd : bimsyncCmdBase
+    public class ModelListCmd : bimsyncCmdBase
     {
         [Option(CommandOptionType.SingleValue, ShortName = "p", LongName = "project", Description = "The name or the id of the projet containing the models", ValueName = "project name", ShowInHelpText = true)]
         public string ProjectId { get; set; }
-        public ModelListCmd(ILogger<ModelCmd> logger, IConsole console, IHttpClientFactory clientFactory, IBimsyncClient bimsyncClient, SettingsService settingsService)
+        public ModelListCmd(ILogger<ModelCmd> logger, IConsole console, IBimsyncClient bimsyncClient, SettingsService settingsService)
         {
             _logger = logger;
             _console = console;
-            _httpClientFactory = clientFactory;
             _bimsyncClient = bimsyncClient;
             _settingsService = settingsService;
         }

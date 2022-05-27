@@ -25,13 +25,12 @@ using Spectre.Console.Rendering;
 namespace BimsyncCLI
 {
     [HelpOption("--help")]
-    abstract class bimsyncCmdBase
+    public abstract class bimsyncCmdBase
     {
         protected IBimsyncClient _bimsyncClient;
         protected AuthenticationService _authenticationService;
         protected SettingsService _settingsService;
         protected ILogger _logger;
-        protected IHttpClientFactory _httpClientFactory;
         protected IConsole _console;
 
         [Option(CommandOptionType.SingleValue, ShortName = "f", LongName = "output-format", Description = "Select the output format", ValueName = "table|json|xml", ShowInHelpText = true)]

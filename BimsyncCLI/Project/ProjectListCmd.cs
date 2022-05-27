@@ -18,11 +18,10 @@ namespace BimsyncCLI.ProjectCmd
     [Command(Name = "list", Description = "List available Bimsync projects.")]
     class ProjectListCmd : bimsyncCmdBase
     {
-        public ProjectListCmd(ILogger<ProjectCmd> logger, IConsole console, IHttpClientFactory clientFactory, IBimsyncClient bimsyncClient, SettingsService settingsService)
+        public ProjectListCmd(ILogger<ProjectCmd> logger, IConsole console, IBimsyncClient bimsyncClient, SettingsService settingsService)
         {
             _logger = logger;
             _console = console;
-            _httpClientFactory = clientFactory;
             _bimsyncClient = bimsyncClient;
             _settingsService = settingsService;
         }

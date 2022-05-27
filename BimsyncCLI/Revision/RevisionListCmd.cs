@@ -1,6 +1,7 @@
 using McMaster.Extensions.CommandLineUtils;
 using Microsoft.Extensions.Logging;
 using System;
+using System.Linq;
 using System.IO;
 using System.Net.Http;
 using System.Text;
@@ -8,46 +9,38 @@ using System.Threading.Tasks;
 using System.Text.Json;
 using System.Xml;
 using System.Collections.Generic;
-using System.Linq;
 using BimsyncCLI.Models.Bimsync;
 using BimsyncCLI.Services.HttpServices;
 using BimsyncCLI.Services;
 using Spectre.Console;
 
-namespace BimsyncCLI.ModelCmd
+namespace BimsyncCLI.RevisionCmd
 {
-    [Command(Name = "create", Description = "Create a new model.")]
-    class ModelCreateCmd : bimsyncCmdBase
+    [Command(Name = "list", Description = "List all revisions in a project.")]
+    class RevisionListCmd : bimsyncCmdBase
     {
-        [Option(CommandOptionType.SingleValue, ShortName = "p", LongName = "project", Description = "The name or the Id of the projet", ValueName = "project name", ShowInHelpText = true)]
+        [Option(CommandOptionType.SingleValue, ShortName = "p", LongName = "project", Description = "The name or the id of the projet containing the revisions", ValueName = "project name", ShowInHelpText = true)]
         public string ProjectId { get; set; }
+        [Option(CommandOptionType.SingleValue, ShortName = "m", LongName = "model", Description = "The name or the id of the model containing the revisions (Optional)", ValueName = "model name", ShowInHelpText = true)]
+        public string ModelId { get; set; }
 
-        [Option(CommandOptionType.SingleValue, ShortName = "n", LongName = "name", Description = "The name of the model", ValueName = "model name", ShowInHelpText = true)]
-        public string Name { get; set; }
-
-        public ModelCreateCmd(ILogger<ModelCmd> logger, IConsole console, IHttpClientFactory clientFactory, IBimsyncClient bimsyncClient, SettingsService settingsService)
+        public RevisionListCmd(ILogger<RevisionCmd> logger, IConsole console, IBimsyncClient bimsyncClient, SettingsService settingsService)
         {
             _logger = logger;
             _console = console;
-            _httpClientFactory = clientFactory;
             _bimsyncClient = bimsyncClient;
             _settingsService = settingsService;
         }
-        private ModelCmd Parent { get; set; }
+        private RevisionCmd Parent { get; set; }
 
         protected override async Task<int> OnExecute(CommandLineApplication app)
         {
+
             try
             {
                 if (string.IsNullOrEmpty(ProjectId))
                 {
                     OutputError("Please specify a project name or id.");
-                    return 0;
-                }
-
-                if (string.IsNullOrEmpty(Name))
-                {
-                    OutputError("Please specify a model name.");
                     return 0;
                 }
 
@@ -68,20 +61,26 @@ namespace BimsyncCLI.ModelCmd
                     return 0;
                 }
 
-                if (!string.IsNullOrEmpty(Name))
-                {
-                    Model model = await _bimsyncClient.CreateModel(selectedProject.id, Name, _settingsService.CancellationToken);
+                string selectedModelId = null;
 
-                    if (model == null)
+                if (!string.IsNullOrEmpty(ModelId))
+                {
+                    List<Model> models = await _bimsyncClient.GetModels(selectedProject.id, _settingsService.CancellationToken);
+                    // Try to find a model by name
+                    Model selectedModel = models.Where(p => p.name == ModelId).FirstOrDefault();
+
+                    if (selectedModel == null)
                     {
-                        OutputError("Something went wrong, the model has not been created.");
-                        return 0;
+                        // Try to find a model by id
+                        selectedModel = models.Where(p => p.id == ModelId).FirstOrDefault();
                     }
-                    else
-                    {
-                        OutputJson(model, new[] { "Name", "Id" });
-                    }
+
+                    if (selectedModel != null) selectedModelId = selectedModel.id;
                 }
+
+                List<Revision> revisions = await _bimsyncClient.GetRevisions(selectedProject.id, selectedModelId, _settingsService.CancellationToken);
+
+                OutputJson(revisions, new[] { "Comment", "Created At", "Version" });
 
                 return 0;
 

@@ -23,12 +23,11 @@ namespace BimsyncCLI
     [Command(Name = "sign-in", Description = "Sign in to Bimsync, the login crendentials will be saved locally in the profile")]
     class SignInCmd : bimsyncCmdBase
     {
-        public SignInCmd(ILogger<SignInCmd> logger, IConsole console, IHttpClientFactory clientFactory,
+        public SignInCmd(ILogger<SignInCmd> logger, IConsole console, 
          IBimsyncClient bimsyncClient, AuthenticationService authenticationService, SettingsService settingsService)
         {
             _logger = logger;
             _console = console;
-            _httpClientFactory = clientFactory;
             _bimsyncClient = bimsyncClient;
             _authenticationService = authenticationService;
             _settingsService = settingsService;

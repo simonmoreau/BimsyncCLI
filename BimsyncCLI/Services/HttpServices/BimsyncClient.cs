@@ -15,7 +15,7 @@ using System.Diagnostics;
 
 namespace BimsyncCLI.Services.HttpServices
 {
-    class BimsyncClient : IBimsyncClient
+    public class BimsyncClient : IBimsyncClient
     {
         private HttpClient _client;
 

@@ -21,11 +21,10 @@ namespace BimsyncCLI.ProjectCmd
         typeof(ProjectShowCmd))]
     class ProjectCmd : bimsyncCmdBase
     {
-        public ProjectCmd(ILogger<ProjectCmd> logger, IConsole console, IHttpClientFactory clientFactory, IBimsyncClient bimsyncClient, SettingsService settingsService)
+        public ProjectCmd(ILogger<ProjectCmd> logger, IConsole console, IBimsyncClient bimsyncClient, SettingsService settingsService)
         {
             _logger = logger;
             _console = console;
-            _httpClientFactory = clientFactory;
             _bimsyncClient = bimsyncClient;
             _settingsService = settingsService;
         }

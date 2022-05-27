@@ -10,7 +10,7 @@
             "request": "launch",
             "preLaunchTask": "build",
             // If you have changed target frameworks, make sure to update the program path.
-            "program": "${workspaceFolder}/bin/Debug/netcoreapp3.1/win7-x64/bimsyncCLI.dll",
+            "program": "${workspaceFolder}/BimsyncCLI/bin/Debug/netcoreapp3.1/win7-x64/bimsyncCLI.dll",
             "args": ["revision","list","-f json", "-p e43d8c79d1c6409eb3dd871170b4d6b0", "-m 5c2c7d5022e54e21833795b7393f4d9f"],
             "cwd": "${workspaceFolder}",
             // For more information about the 'console' field, see https://aka.ms/VSCode-CS-LaunchJson-Console

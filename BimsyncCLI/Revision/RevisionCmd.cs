@@ -13,20 +13,17 @@ using BimsyncCLI.Services.HttpServices;
 using BimsyncCLI.Services;
 using Spectre.Console;
 
-namespace BimsyncCLI.ModelCmd
+namespace BimsyncCLI.RevisionCmd
 {
-    [Command(Name = "model", Description = "Manage available Bimsync models")]
+    [Command(Name = "revision", Description = "Manage revisions of Bimsync models")]
     [Subcommand(
-        typeof(ModelListCmd),
-        typeof(ModelShowCmd),
-        typeof(ModelCreateCmd))]
-    class ModelCmd : bimsyncCmdBase
+        typeof(RevisionListCmd))]
+    class RevisionCmd : bimsyncCmdBase
     {
-        public ModelCmd(ILogger<ModelCmd> logger, IConsole console, IHttpClientFactory clientFactory, IBimsyncClient bimsyncClient, SettingsService settingsService)
+        public RevisionCmd(ILogger<RevisionCmd> logger, IConsole console, IBimsyncClient bimsyncClient, SettingsService settingsService)
         {
             _logger = logger;
             _console = console;
-            _httpClientFactory = clientFactory;
             _bimsyncClient = bimsyncClient;
             _settingsService = settingsService;
         }

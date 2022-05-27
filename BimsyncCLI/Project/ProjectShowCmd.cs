@@ -25,11 +25,10 @@ namespace BimsyncCLI.ProjectCmd
         [Option(CommandOptionType.SingleValue, ShortName = "i", LongName = "id", Description = "The id of the project.", ValueName = "project id", ShowInHelpText = true)]
         public string Id { get; set; }
 
-        public ProjectShowCmd(ILogger<ProjectCmd> logger, IConsole console, IHttpClientFactory clientFactory, IBimsyncClient bimsyncClient, SettingsService settingsService)
+        public ProjectShowCmd(ILogger<ProjectCmd> logger, IConsole console, IBimsyncClient bimsyncClient, SettingsService settingsService)
         {
             _logger = logger;
             _console = console;
-            _httpClientFactory = clientFactory;
             _bimsyncClient = bimsyncClient;
             _settingsService = settingsService;
         }
